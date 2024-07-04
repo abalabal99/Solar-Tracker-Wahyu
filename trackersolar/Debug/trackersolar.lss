@@ -1,0 +1,340 @@
+
+trackersolar.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000001b2  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  00000206  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000030  00000000  00000000  00000206  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000238  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000050  00000000  00000000  00000274  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   000008b2  00000000  00000000  000002c4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 00000695  00000000  00000000  00000b76  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   00000363  00000000  00000000  0000120b  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  000000b0  00000000  00000000  00001570  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    000003ee  00000000  00000000  00001620  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    0000029a  00000000  00000000  00001a0e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000040  00000000  00000000  00001ca8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   8:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  10:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  14:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  18:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  1c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  20:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  24:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  28:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  2c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  30:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  34:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  38:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  3c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  40:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  44:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  48:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  4c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  50:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d8 e0       	ldi	r29, 0x08	; 8
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+  60:	0e 94 96 00 	call	0x12c	; 0x12c <main>
+  64:	0c 94 d7 00 	jmp	0x1ae	; 0x1ae <_exit>
+
+00000068 <__bad_interrupt>:
+  68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000006c <adc_init>:
+
+// Histeresis threshold
+#define HYSTERESIS_THRESHOLD 10
+
+void adc_init(void) {
+	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Enable ADC, set prescaler to 128
+  6c:	87 e8       	ldi	r24, 0x87	; 135
+  6e:	86 b9       	out	0x06, r24	; 6
+	ADMUX = (1 << REFS0); // Set reference voltage to AVcc (5V)
+  70:	80 e4       	ldi	r24, 0x40	; 64
+  72:	87 b9       	out	0x07, r24	; 7
+  74:	08 95       	ret
+
+00000076 <adc_read>:
+}
+
+uint16_t adc_read(uint8_t channel) {
+	ADMUX = (ADMUX & 0xF8) | (channel & 0x07); // Select ADC channel
+  76:	97 b1       	in	r25, 0x07	; 7
+  78:	98 7f       	andi	r25, 0xF8	; 248
+  7a:	87 70       	andi	r24, 0x07	; 7
+  7c:	89 2b       	or	r24, r25
+  7e:	87 b9       	out	0x07, r24	; 7
+	ADCSRA |= (1 << ADSC); // Start conversion
+  80:	86 b1       	in	r24, 0x06	; 6
+  82:	80 64       	ori	r24, 0x40	; 64
+  84:	86 b9       	out	0x06, r24	; 6
+	while (ADCSRA & (1 << ADSC)); // Wait for conversion to complete
+  86:	36 99       	sbic	0x06, 6	; 6
+  88:	fe cf       	rjmp	.-4      	; 0x86 <adc_read+0x10>
+	return ADC;
+  8a:	84 b1       	in	r24, 0x04	; 4
+  8c:	95 b1       	in	r25, 0x05	; 5
+}
+  8e:	08 95       	ret
+
+00000090 <pwm_init>:
+
+void pwm_init(void) {
+	DDRD |= (1 << PD5) | (1 << PD4); // Set PD5 and PD4 as output
+  90:	81 b3       	in	r24, 0x11	; 17
+  92:	80 63       	ori	r24, 0x30	; 48
+  94:	81 bb       	out	0x11, r24	; 17
+	TCCR1A = (1 << WGM11) | (1 << COM1A1) | (1 << COM1B1); // Fast PWM, non-inverted output
+  96:	82 ea       	ldi	r24, 0xA2	; 162
+  98:	8f bd       	out	0x2f, r24	; 47
+	TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS11); // Prescaler 8
+  9a:	8a e1       	ldi	r24, 0x1A	; 26
+  9c:	8e bd       	out	0x2e, r24	; 46
+	ICR1 = 39999; // TOP value for 50Hz frequency
+  9e:	8f e3       	ldi	r24, 0x3F	; 63
+  a0:	9c e9       	ldi	r25, 0x9C	; 156
+  a2:	97 bd       	out	0x27, r25	; 39
+  a4:	86 bd       	out	0x26, r24	; 38
+  a6:	08 95       	ret
+
+000000a8 <set_servo_angle>:
+}
+
+void set_servo_angle(uint8_t servo, uint8_t angle) {
+	uint16_t pulse_width = ((angle * 11) + 600); // Convert angle to pulse width
+  a8:	9b e0       	ldi	r25, 0x0B	; 11
+  aa:	69 9f       	mul	r22, r25
+  ac:	b0 01       	movw	r22, r0
+  ae:	11 24       	eor	r1, r1
+  b0:	68 5a       	subi	r22, 0xA8	; 168
+  b2:	7d 4f       	sbci	r23, 0xFD	; 253
+	if (servo == 1) {
+  b4:	81 30       	cpi	r24, 0x01	; 1
+  b6:	19 f4       	brne	.+6      	; 0xbe <set_servo_angle+0x16>
+		OCR1A = pulse_width;
+  b8:	7b bd       	out	0x2b, r23	; 43
+  ba:	6a bd       	out	0x2a, r22	; 42
+  bc:	08 95       	ret
+		} else if (servo == 2) {
+  be:	82 30       	cpi	r24, 0x02	; 2
+  c0:	11 f4       	brne	.+4      	; 0xc6 <set_servo_angle+0x1e>
+		OCR1B = pulse_width;
+  c2:	79 bd       	out	0x29, r23	; 41
+  c4:	68 bd       	out	0x28, r22	; 40
+  c6:	08 95       	ret
+
+000000c8 <calibrate_ldr>:
+	}
+}
+
+void calibrate_ldr(uint16_t *ldr_values) {
+  c8:	ef 92       	push	r14
+  ca:	ff 92       	push	r15
+  cc:	1f 93       	push	r17
+  ce:	cf 93       	push	r28
+  d0:	df 93       	push	r29
+  d2:	7c 01       	movw	r14, r24
+	for (uint8_t i = 0; i < 4; i++) {
+  d4:	10 e0       	ldi	r17, 0x00	; 0
+  d6:	12 c0       	rjmp	.+36     	; 0xfc <calibrate_ldr+0x34>
+		ldr_values[i] = adc_read(i);
+  d8:	c1 2f       	mov	r28, r17
+  da:	d0 e0       	ldi	r29, 0x00	; 0
+  dc:	cc 0f       	add	r28, r28
+  de:	dd 1f       	adc	r29, r29
+  e0:	ce 0d       	add	r28, r14
+  e2:	df 1d       	adc	r29, r15
+  e4:	81 2f       	mov	r24, r17
+  e6:	0e 94 3b 00 	call	0x76	; 0x76 <adc_read>
+  ea:	99 83       	std	Y+1, r25	; 0x01
+  ec:	88 83       	st	Y, r24
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  ee:	8f e3       	ldi	r24, 0x3F	; 63
+  f0:	9c e9       	ldi	r25, 0x9C	; 156
+  f2:	01 97       	sbiw	r24, 0x01	; 1
+  f4:	f1 f7       	brne	.-4      	; 0xf2 <calibrate_ldr+0x2a>
+  f6:	00 c0       	rjmp	.+0      	; 0xf8 <calibrate_ldr+0x30>
+  f8:	00 00       	nop
+		OCR1B = pulse_width;
+	}
+}
+
+void calibrate_ldr(uint16_t *ldr_values) {
+	for (uint8_t i = 0; i < 4; i++) {
+  fa:	1f 5f       	subi	r17, 0xFF	; 255
+  fc:	14 30       	cpi	r17, 0x04	; 4
+  fe:	60 f3       	brcs	.-40     	; 0xd8 <calibrate_ldr+0x10>
+		ldr_values[i] = adc_read(i);
+		_delay_ms(10);
+	}
+}
+ 100:	df 91       	pop	r29
+ 102:	cf 91       	pop	r28
+ 104:	1f 91       	pop	r17
+ 106:	ff 90       	pop	r15
+ 108:	ef 90       	pop	r14
+ 10a:	08 95       	ret
+
+0000010c <calculate_angle>:
+		vertical_angle = 45; // Move up
+		} else if (bottom > top + HYSTERESIS_THRESHOLD) {
+		vertical_angle = 135; // Move down
+	}
+
+	if (left > right + HYSTERESIS_THRESHOLD) {
+ 10c:	c9 01       	movw	r24, r18
+ 10e:	0a 96       	adiw	r24, 0x0a	; 10
+ 110:	84 17       	cp	r24, r20
+ 112:	95 07       	cpc	r25, r21
+ 114:	38 f0       	brcs	.+14     	; 0x124 <calculate_angle+0x18>
+		horizontal_angle = 45; // Move left
+		} else if (right > left + HYSTERESIS_THRESHOLD) {
+ 116:	46 5f       	subi	r20, 0xF6	; 246
+ 118:	5f 4f       	sbci	r21, 0xFF	; 255
+ 11a:	42 17       	cp	r20, r18
+ 11c:	53 07       	cpc	r21, r19
+ 11e:	20 f0       	brcs	.+8      	; 0x128 <calculate_angle+0x1c>
+}
+
+uint8_t calculate_angle(uint16_t top, uint16_t bottom, uint16_t left, uint16_t right) {
+	// Placeholder simple algorithm for demonstration; should be improved for real application
+	uint8_t vertical_angle = 90;
+	uint8_t horizontal_angle = 90;
+ 120:	8a e5       	ldi	r24, 0x5A	; 90
+ 122:	08 95       	ret
+		} else if (bottom > top + HYSTERESIS_THRESHOLD) {
+		vertical_angle = 135; // Move down
+	}
+
+	if (left > right + HYSTERESIS_THRESHOLD) {
+		horizontal_angle = 45; // Move left
+ 124:	8d e2       	ldi	r24, 0x2D	; 45
+ 126:	08 95       	ret
+		} else if (right > left + HYSTERESIS_THRESHOLD) {
+		horizontal_angle = 135; // Move right
+ 128:	87 e8       	ldi	r24, 0x87	; 135
+	}
+
+	return (vertical_angle << 8) | horizontal_angle;
+}
+ 12a:	08 95       	ret
+
+0000012c <main>:
+
+int main(void) {
+ 12c:	cf 93       	push	r28
+ 12e:	df 93       	push	r29
+ 130:	cd b7       	in	r28, 0x3d	; 61
+ 132:	de b7       	in	r29, 0x3e	; 62
+ 134:	28 97       	sbiw	r28, 0x08	; 8
+ 136:	0f b6       	in	r0, 0x3f	; 63
+ 138:	f8 94       	cli
+ 13a:	de bf       	out	0x3e, r29	; 62
+ 13c:	0f be       	out	0x3f, r0	; 63
+ 13e:	cd bf       	out	0x3d, r28	; 61
+	adc_init();
+ 140:	0e 94 36 00 	call	0x6c	; 0x6c <adc_init>
+	pwm_init();
+ 144:	0e 94 48 00 	call	0x90	; 0x90 <pwm_init>
+	uint16_t ldr_values[4];
+	uint8_t vertical_angle = 90;
+	uint8_t horizontal_angle = 90;
+	
+	while (1) {
+		calibrate_ldr(ldr_values);
+ 148:	ce 01       	movw	r24, r28
+ 14a:	01 96       	adiw	r24, 0x01	; 1
+ 14c:	0e 94 64 00 	call	0xc8	; 0xc8 <calibrate_ldr>
+		
+		uint16_t avg_top = (ldr_values[0] + ldr_values[1]) / 2;
+ 150:	a9 81       	ldd	r26, Y+1	; 0x01
+ 152:	ba 81       	ldd	r27, Y+2	; 0x02
+ 154:	eb 81       	ldd	r30, Y+3	; 0x03
+ 156:	fc 81       	ldd	r31, Y+4	; 0x04
+ 158:	cd 01       	movw	r24, r26
+ 15a:	8e 0f       	add	r24, r30
+ 15c:	9f 1f       	adc	r25, r31
+		uint16_t avg_bottom = (ldr_values[2] + ldr_values[3]) / 2;
+ 15e:	4d 81       	ldd	r20, Y+5	; 0x05
+ 160:	5e 81       	ldd	r21, Y+6	; 0x06
+ 162:	2f 81       	ldd	r18, Y+7	; 0x07
+ 164:	38 85       	ldd	r19, Y+8	; 0x08
+ 166:	ba 01       	movw	r22, r20
+ 168:	62 0f       	add	r22, r18
+ 16a:	73 1f       	adc	r23, r19
+ 16c:	76 95       	lsr	r23
+ 16e:	67 95       	ror	r22
+		uint16_t avg_left = (ldr_values[0] + ldr_values[2]) / 2;
+ 170:	4a 0f       	add	r20, r26
+ 172:	5b 1f       	adc	r21, r27
+ 174:	56 95       	lsr	r21
+ 176:	47 95       	ror	r20
+		uint16_t avg_right = (ldr_values[1] + ldr_values[3]) / 2;
+ 178:	2e 0f       	add	r18, r30
+ 17a:	3f 1f       	adc	r19, r31
+ 17c:	36 95       	lsr	r19
+ 17e:	27 95       	ror	r18
+		
+		uint16_t angles = calculate_angle(avg_top, avg_bottom, avg_left, avg_right);
+ 180:	96 95       	lsr	r25
+ 182:	87 95       	ror	r24
+ 184:	0e 94 86 00 	call	0x10c	; 0x10c <calculate_angle>
+ 188:	18 2f       	mov	r17, r24
+		vertical_angle = (angles >> 8) & 0xFF;
+		horizontal_angle = angles & 0xFF;
+		
+		set_servo_angle(1, vertical_angle);
+ 18a:	60 e0       	ldi	r22, 0x00	; 0
+ 18c:	81 e0       	ldi	r24, 0x01	; 1
+ 18e:	0e 94 54 00 	call	0xa8	; 0xa8 <set_servo_angle>
+		set_servo_angle(2, horizontal_angle);
+ 192:	61 2f       	mov	r22, r17
+ 194:	82 e0       	ldi	r24, 0x02	; 2
+ 196:	0e 94 54 00 	call	0xa8	; 0xa8 <set_servo_angle>
+ 19a:	2f ef       	ldi	r18, 0xFF	; 255
+ 19c:	81 ee       	ldi	r24, 0xE1	; 225
+ 19e:	94 e0       	ldi	r25, 0x04	; 4
+ 1a0:	21 50       	subi	r18, 0x01	; 1
+ 1a2:	80 40       	sbci	r24, 0x00	; 0
+ 1a4:	90 40       	sbci	r25, 0x00	; 0
+ 1a6:	e1 f7       	brne	.-8      	; 0x1a0 <main+0x74>
+ 1a8:	00 c0       	rjmp	.+0      	; 0x1aa <main+0x7e>
+ 1aa:	00 00       	nop
+ 1ac:	cd cf       	rjmp	.-102    	; 0x148 <main+0x1c>
+
+000001ae <_exit>:
+ 1ae:	f8 94       	cli
+
+000001b0 <__stop_program>:
+ 1b0:	ff cf       	rjmp	.-2      	; 0x1b0 <__stop_program>
